@@ -3,119 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SET SALE CODE 系統 (V6 體感版)</title>
+    <title>SET SALE CODE 系統 (V7)</title>
     <style>
-        :root { --bg: #f4f7f6; --card: #fff; --blue: #007bff; --text: #333; --red: #dc3545; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 300px; user-select: none; /* 防止長按選取文字 */ }
+        :root { --bg: #f2f2f7; --card: #ffffff; --blue: #007aff; --text: #000000; --red: #ff3b30; --key-light: #ffffff; --key-dark: #b2b2b2; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 320px; user-select: none; -webkit-user-select: none; }
         
         /* 匯入畫面 */
         #import-screen { display: block; text-align: center; padding: 20px; }
-        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: monospace; box-sizing: border-box; }
-        .btn-save { background: #28a745; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; margin-top: 15px; width: 100%; font-weight: bold; }
+        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #c7c7cc; border-radius: 10px; font-family: monospace; box-sizing: border-box; background: #fff; }
+        .btn-save { background: #34c759; color: white; padding: 12px; border: none; border-radius: 10px; font-size: 17px; margin-top: 15px; width: 100%; font-weight: 600; }
 
         /* 查詢畫面 */
         #search-screen { display: none; }
-        .header { background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; margin-bottom: 15px; position: sticky; top: 10px; z-index: 50; }
-        h2 { margin: 0 0 5px 0; font-size: 1.3rem; color: #2c3e50; }
-        .db-info { font-size: 12px; color: #888; margin-bottom: 10px; }
+        .header { background: var(--card); padding: 15px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; position: sticky; top: 10px; z-index: 50; }
+        h2 { margin: 0 0 5px 0; font-size: 1.2rem; color: #1c1c1e; }
+        .db-info { font-size: 13px; color: #8e8e93; margin-bottom: 8px; }
 
         /* 模擬輸入框 */
         .input-display {
-            width: 140px;
+            width: 160px;
             margin: 0 auto;
-            background: #fff;
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 26px;
-            font-weight: bold;
+            background: #e5e5ea;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 28px;
+            font-weight: 600;
             text-align: center;
             letter-spacing: 1px;
-            color: #333;
-            min-height: 36px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            color: #000;
+            min-height: 40px;
         }
         .input-display.active::after {
             content: '|';
             animation: blink 1s step-start infinite;
-            color: #007bff;
+            color: var(--blue);
             margin-left: 2px;
+            font-weight: normal;
         }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* === 專用鍵盤 === */
+        /* 列表 */
+        .list-box { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
+        .card { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-head { padding: 10px 15px; color: white; font-weight: 600; font-size: 15px; }
+        .bg-a { background: #007aff; } .bg-b { background: #34c759; } .bg-c { background: #ff9500; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 12px 15px; border-bottom: 1px solid #e5e5ea; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .code { font-weight: 700; font-family: monospace; font-size: 1.3em; width: 60px; color: #1c1c1e; }
+        .info { font-size: 16px; font-weight: 500; line-height: 1.3; margin-bottom: 4px; }
+        .tag { display: inline-block; background: #f2f2f7; padding: 3px 8px; border-radius: 6px; font-size: 13px; color: #8e8e93; font-weight: 500; }
+
+        .footer-action { text-align: center; margin-top: 30px; margin-bottom: 30px; }
+        .btn-reset { background: var(--red); color: white; border: none; padding: 12px 40px; border-radius: 25px; font-size: 15px; font-weight: 600; }
+
+        /* === iOS 風格鍵盤 === */
         #custom-keyboard {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: #e9ecef;
-            padding: 8px;
-            padding-bottom: 25px; /* iPhone底條位 */
+            background: #d1d5db; /* iOS Keyboard Gray */
+            backdrop-filter: blur(10px);
+            padding: 6px;
+            padding-bottom: 25px; /* iPhone Home Bar */
             box-sizing: border-box;
             z-index: 1000;
-            border-top: 1px solid #ccc;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
             display: none;
-            grid-template-columns: repeat(5, 1fr); /* 5直行 */
+            grid-template-columns: repeat(5, 1fr);
             gap: 6px;
         }
 
         .kb-key {
-            background: #fff;
-            color: #333;
+            background: var(--key-light);
+            color: #000;
             border: none;
-            border-radius: 8px;
-            height: 58px; /* 加高少少好撳啲 */
+            border-radius: 5px;
+            height: 52px;
             font-size: 22px;
-            font-weight: bold;
-            box-shadow: 0 3px 0 #adb5bd;
+            font-weight: 400;
+            box-shadow: 0 1px 0 #898a8d;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.05s, box-shadow 0.05s;
         }
-        /* 按下效果 */
-        .kb-key:active { 
-            background: #f0f0f0; 
-            box-shadow: 0 0 0 #adb5bd; 
-            transform: translateY(3px); 
-        }
+        .kb-key:active { background: #e5e5ea; }
         
-        .k-abc { background: #e7f1ff; color: #007bff; }
-        .k-num { background: #fff; }
-        .k-del { background: #fff0f1; color: #dc3545; font-size: 20px; }
-        .k-go  { background: #007bff; color: white; font-size: 18px; box-shadow: 0 3px 0 #0056b3; }
-        .k-go:active { background: #0056b3; box-shadow: 0 0 0; }
-
-        /* 列表 */
-        .list-box { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .card-head { padding: 10px 15px; color: white; font-weight: bold; }
-        .bg-a { background: #4e73df; } .bg-b { background: #1cc88a; } .bg-c { background: #f6c23e; color: #333; }
+        .k-abc { font-weight: 500; }
+        .k-num { font-weight: 400; font-size: 24px; }
         
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
-        .code { font-weight: bold; font-family: monospace; font-size: 1.2em; width: 20%; color: #333; }
-        .info { font-size: 15px; font-weight: 600; line-height: 1.4; }
-        .tag { display: inline-block; background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; color: #666; margin-top: 5px; }
-
-        .footer-action { text-align: center; margin-top: 30px; margin-bottom: 30px; }
-        .btn-reset { background: #dc3545; color: white; border: none; padding: 10px 30px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(220,53,69,0.2); }
+        /* 功能鍵深色底 */
+        .k-del { background: #adb3bc; color: #000; font-size: 18px; }
+        .k-del:active { background: #fff; }
+        
+        /* 查詢鍵藍色 */
+        .k-go  { background: var(--blue); color: white; font-size: 17px; font-weight: 600; }
+        .k-go:active { background: #0056b3; }
 
         /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; max-height: 70vh; overflow-y: auto; }
-        .opt-btn { width: 100%; margin: 8px 0; padding: 15px; font-size: 16px; background: #fff; border: 2px solid #eee; border-radius: 8px; text-align: left; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-box { background: #f2f2f7; padding: 20px; border-radius: 14px; width: 85%; max-width: 300px; text-align: center; max-height: 70vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .opt-btn { width: 100%; margin: 6px 0; padding: 14px; font-size: 16px; background: #fff; border: none; border-radius: 10px; text-align: center; color: var(--blue); font-weight: 500; }
+        .opt-btn:active { background: #e5e5ea; }
     </style>
 </head>
 <body>
 
     <div id="import-screen">
-        <h2>📥 系統設定 (V6)</h2>
-        <p style="color:#666; font-size:12px;">請貼上純文字資料...</p>
+        <h2>📥 系統設定 (V7)</h2>
+        <p style="color:#8e8e93; font-size:13px;">請貼上純文字資料...</p>
         <textarea id="data-input" placeholder="A1|產品|型號|Code..."></textarea>
         <button class="btn-save" onclick="saveData()">✅ 確認匯入</button>
     </div>
@@ -134,9 +134,9 @@
         </div>
 
         <div class="footer-action">
-            <button class="btn-reset" onclick="resetAll()">🗑️ 清除所有結果</button>
-            <div style="margin-top:15px;">
-                <button onclick="clearCache()" style="color:#999; background:none; border:none; text-decoration:underline; font-size:12px;">重新匯入資料</button>
+            <button class="btn-reset" onclick="resetAll()">🗑️ 清除結果</button>
+            <div style="margin-top:20px;">
+                <button onclick="clearCache()" style="color:#8e8e93; background:none; border:none; text-decoration:underline; font-size:13px;">重新匯入資料</button>
             </div>
         </div>
     </div>
@@ -144,29 +144,29 @@
     <div id="custom-keyboard">
         <button class="kb-key k-abc" onmousedown="tap('A')">A</button>
         <button class="kb-key k-num" onmousedown="tap('1')">1</button>
-        <button class="kb-key k-num" onmousedown="tap('4')">4</button>
-        <button class="kb-key k-num" onmousedown="tap('7')">7</button>
+        <button class="kb-key k-num" onmousedown="tap('2')">2</button>
+        <button class="kb-key k-num" onmousedown="tap('3')">3</button>
         <button class="kb-key k-del" onmousedown="tap('DEL')">⌫</button>
 
         <button class="kb-key k-abc" onmousedown="tap('B')">B</button>
-        <button class="kb-key k-num" onmousedown="tap('2')">2</button>
+        <button class="kb-key k-num" onmousedown="tap('4')">4</button>
         <button class="kb-key k-num" onmousedown="tap('5')">5</button>
-        <button class="kb-key k-num" onmousedown="tap('8')">8</button>
+        <button class="kb-key k-num" onmousedown="tap('6')">6</button>
         <button class="kb-key k-num" onmousedown="tap('0')">0</button>
 
         <button class="kb-key k-abc" onmousedown="tap('C')">C</button>
-        <button class="kb-key k-num" onmousedown="tap('3')">3</button>
-        <button class="kb-key k-num" onmousedown="tap('6')">6</button>
+        <button class="kb-key k-num" onmousedown="tap('7')">7</button>
+        <button class="kb-key k-num" onmousedown="tap('8')">8</button>
         <button class="kb-key k-num" onmousedown="tap('9')">9</button>
         <button class="kb-key k-go" onmousedown="tap('GO')">GO</button>
     </div>
 
     <div id="modal" class="modal">
         <div class="modal-box">
-            <h3>請選擇版本</h3>
-            <b id="m-code" style="font-size:1.5em; color:#007bff; display:block; margin-bottom:10px;"></b>
+            <h3 style="margin-top:0; color:#000;">請選擇版本</h3>
+            <b id="m-code" style="font-size:1.6em; color:var(--blue); display:block; margin-bottom:15px;"></b>
             <div id="m-list"></div>
-            <button onclick="closeM()" style="margin-top:15px; background:#f8f9fa; color:#666; padding:10px; width:100%; border:none; border-radius:8px;">取消</button>
+            <button onclick="closeM()" style="margin-top:15px; background:#fff; color:var(--red); padding:12px; width:100%; border:none; border-radius:10px; font-weight:600;">取消</button>
         </div>
     </div>
 
@@ -174,11 +174,11 @@
         let db = {};
         let currentInput = "";
         
-        // 音效引擎 (Web Audio API) - 無需外部檔案
+        // 音效引擎 (Web Audio API)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        function playSound(type) {
-            // 嘗試喚醒 AudioContext (iOS 必須)
+        function playClick() {
+            // iOS 喚醒
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
             const osc = audioCtx.createOscillator();
@@ -187,59 +187,61 @@
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
-            if (type === 'click') {
-                // 普通按鍵聲 (高頻短促)
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
-            } else if (type === 'go') {
-                // 查詢成功聲 (叮一聲)
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
-            } else if (type === 'del') {
-                // 刪除聲 (低頻)
+            // 模擬 iOS 鍵盤 "Tock" 聲 (低頻、極短)
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.03);
+            
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.03);
+        }
+
+        function playTone(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if(type === 'del') {
+                // 刪除聲 (稍微不同)
                 osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                 gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.type = 'square';
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
+            } else if(type === 'go') {
+                // 查詢聲 (清脆)
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             }
+            osc.start();
+            osc.stop(audioCtx.currentTime + (type==='go'?0.1:0.05));
         }
 
         function triggerVibration() {
-            // Android 震動 (iOS 網頁通常不支援 vibrate)
-            if (navigator.vibrate) navigator.vibrate(15); 
+            if (navigator.vibrate) navigator.vibrate(10); // 輕震
         }
 
-        // 統一處理按鍵 (支援滑鼠點擊同手指觸控)
         function tap(key) {
-            triggerVibration(); // 震動
+            triggerVibration();
 
             if (key === 'DEL') {
-                playSound('del');
+                playTone('del');
                 if (currentInput.length > 0) currentInput = currentInput.slice(0, -1);
-                if (currentInput === "") resetList(); // 刪光自動重置
+                if (currentInput === "") resetList();
             } else if (key === 'GO') {
-                playSound('go');
+                playTone('go');
                 runSearch();
-                return; // 不更新顯示，直接去 runSearch
+                return;
             } else {
-                playSound('click');
+                playClick();
                 if (currentInput.length < 6) currentInput += key;
             }
             updateDisplay();
         }
 
         window.onload = function() {
-            const saved = localStorage.getItem('productData_v6'); 
+            const saved = localStorage.getItem('productData_v7'); 
             if(saved && saved.length > 10) {
                 if(parseData(saved)) switchToSearch();
             }
@@ -256,7 +258,7 @@
             if(!raw) return alert('請貼上資料！');
             raw = raw.replace(/^\uFEFF/, '').trim(); 
             if(parseData(raw)) {
-                localStorage.setItem('productData_v6', raw);
+                localStorage.setItem('productData_v7', raw);
                 switchToSearch();
                 alert('✅ 匯入成功！');
             } else {
@@ -303,8 +305,7 @@
             const res = db[val];
             
             if(!res) {
-                // 找不到時震動兩下
-                if(navigator.vibrate) navigator.vibrate([50, 50, 50]);
+                if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
                 alert('⚠️ 找不到: ' + currentInput);
                 return;
             }
@@ -335,8 +336,8 @@
                     <td class="code">${i.code}</td>
                     <td>
                         <div class="info">${i.name}</div>
-                        <div style="color:#007bff;font-size:0.9em;margin-top:2px;">型號: ${i.model}</div>
-                        <span class="tag">Code: ${i.cargo}</span>
+                        <div style="color:#007aff;font-size:0.9em;margin-top:2px;font-weight:500;">${i.model}</div>
+                        <span class="tag">${i.cargo}</span>
                     </td>
                 `;
                 const tb = document.getElementById(tid);
@@ -354,7 +355,7 @@
                 btn.className = 'opt-btn';
                 btn.innerHTML = `<b>${g || '標準版 / 套裝'}</b>`;
                 btn.onclick = () => { 
-                    playSound('click'); // 彈窗按鈕都有聲
+                    playClick();
                     triggerVibration();
                     add(items.filter(i=>i.group===g)); 
                     closeM(); 
@@ -368,15 +369,15 @@
         function closeM() { document.getElementById('modal').style.display = 'none'; }
         
         function resetAll() { 
-            if(confirm('確定清除所有結果？')) {
+            if(confirm('清除所有結果？')) {
                 resetList();
                 clearInput();
             }
         }
 
         function clearCache() {
-            if(confirm('警告：確定要重新匯入資料？')) {
-                localStorage.removeItem('productData_v6');
+            if(confirm('重設將會清除現有資料，確定？')) {
+                localStorage.removeItem('productData_v7');
                 location.reload();
             }
         }
