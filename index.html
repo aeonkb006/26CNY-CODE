@@ -3,31 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SET SALE CODE 查詢系統</title>
+    <title>SET SALE CODE 系統</title>
     <style>
-        :root { --bg: #f4f7f6; --card: #ffffff; --blue: #007bff; --text: #333333; --red: #dc3545; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 100px; }
+        :root { --bg: #f4f7f6; --card: #fff; --blue: #007bff; --text: #333; --red: #dc3545; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 280px; /* 預留鍵盤高度 */ }
         
-        /* 關鍵修正：預設 display: block，確保不會白屏 */
+        /* 匯入畫面 */
         #import-screen { display: block; text-align: center; padding: 20px; }
+        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: monospace; box-sizing: border-box; }
+        .btn-save { background: #28a745; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; margin-top: 15px; width: 100%; font-weight: bold; cursor: pointer; }
+
+        /* 查詢畫面 */
         #search-screen { display: none; }
-
-        /* 介面樣式 */
-        textarea { width: 100%; height: 200px; padding: 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: monospace; box-sizing: border-box; }
-        .btn-save { background: #28a745; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 16px; margin-top: 15px; cursor: pointer; font-weight: bold; width: 100%; }
-        
-        .header { background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: sticky; top: 10px; z-index: 100; text-align: center; }
+        .header { background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; margin-bottom: 15px; position: sticky; top: 10px; z-index: 50; }
         h2 { margin: 0 0 5px 0; font-size: 1.3rem; color: #2c3e50; }
-        .db-info { font-size: 12px; color: #888; margin-bottom: 12px; }
+        .db-info { font-size: 12px; color: #888; margin-bottom: 10px; }
 
-        .input-group { display: flex; gap: 8px; justify-content: center; }
-        input { width: 120px; padding: 10px; font-size: 18px; text-align: center; border: 2px solid #ddd; border-radius: 8px; outline: none; text-transform: uppercase; font-weight: bold; }
-        input:focus { border-color: var(--blue); }
+        /* 模擬輸入框 */
+        .input-display {
+            width: 140px;
+            margin: 0 auto;
+            background: #fff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 1px;
+            color: #333;
+            min-height: 34px;
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        /* 閃爍光標 */
+        .input-display.active::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+            color: #007bff;
+            margin-left: 2px;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* === 專用鍵盤 (Grid Layout) === */
+        #custom-keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #e9ecef;
+            padding: 8px;
+            padding-bottom: 20px; /* iPhone底條位 */
+            box-sizing: border-box;
+            z-index: 1000;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            display: none;
+            
+            /* 5 直行 Grid */
+            display: none; /* 初始隱藏 */
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .kb-key {
+            background: #fff;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            height: 55px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 0 #adb5bd;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kb-key:active { background: #f0f0f0; box-shadow: none; transform: translateY(2px); }
         
-        .btn-go { background: var(--blue); color: white; border: none; padding: 0 20px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-go:active { background: #0056b3; transform: scale(0.95); }
+        /* 顏色區分 */
+        .k-abc { background: #e7f1ff; color: #007bff; }
+        .k-num { background: #fff; font-size: 22px; }
+        .k-del { background: #f8d7da; color: #dc3545; font-size: 18px; }
+        .k-go  { background: #007bff; color: white; font-size: 16px; box-shadow: 0 2px 0 #0056b3; }
+        .k-go:active { background: #0056b3; }
 
-        .list-box { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        /* 列表 */
+        .list-box { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
         .card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .card-head { padding: 10px 15px; color: white; font-weight: bold; }
         .bg-a { background: #4e73df; } .bg-b { background: #1cc88a; } .bg-c { background: #f6c23e; color: #333; }
@@ -38,35 +102,31 @@
         .info { font-size: 15px; font-weight: 600; line-height: 1.4; }
         .tag { display: inline-block; background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; color: #666; margin-top: 5px; }
 
-        .footer-action { margin-top: 40px; text-align: center; padding-bottom: 20px; }
-        .btn-reset { background: var(--red); color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2); }
+        /* 底部重置 */
+        .footer-action { text-align: center; margin-top: 30px; margin-bottom: 30px; }
+        .btn-reset { background: #dc3545; color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 6px rgba(220,53,69,0.2); }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; max-height: 80vh; overflow-y: auto; }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 320px; text-align: center; max-height: 70vh; overflow-y: auto; }
         .opt-btn { width: 100%; margin: 8px 0; padding: 15px; font-size: 16px; background: #fff; border: 2px solid #eee; border-radius: 8px; text-align: left; }
     </style>
 </head>
 <body>
 
     <div id="import-screen">
-        <h2>📥 系統設定 (V4)</h2>
-        <p style="color:#666; font-size:14px;">請貼上純文字資料：</p>
-        <textarea id="data-input" placeholder="格式: A1|產品名稱|型號|Code|Group"></textarea>
-        <br>
-        <button class="btn-save" onclick="saveData()">✅ 確認並開始</button>
-        <br><br>
-        <button onclick="document.getElementById('data-input').value='A1|測試產品|型號X|C01|';" style="color:#999; background:none; border:none; text-decoration:underline;">(測試) 填入範例資料</button>
+        <h2>📥 系統設定 (V5)</h2>
+        <p style="color:#666; font-size:12px;">請貼上純文字資料...</p>
+        <textarea id="data-input" placeholder="A1|產品|型號|Code..."></textarea>
+        <button class="btn-save" onclick="saveData()">✅ 確認匯入</button>
     </div>
 
     <div id="search-screen">
         <div class="header">
             <h2>SET SALE CODE</h2>
-            <div class="db-info">資料庫: <span id="db-count">0</span> 筆 | 狀態: <span style="color:green">● 正常</span></div>
+            <div class="db-info">資料庫: <span id="db-count">0</span> 筆</div>
             
-            <div class="input-group">
-                <input type="text" id="inp" placeholder="CODE" autocomplete="off">
-                <button class="btn-go" onclick="runSearch()">查詢</button>
-            </div>
+            <div id="display-box" class="input-display active" onclick="clearInput()"></div>
         </div>
 
         <div class="list-box">
@@ -76,11 +136,31 @@
         </div>
 
         <div class="footer-action">
-            <button class="btn-reset" onclick="resetAll()">🗑️ 重置 / 清空</button>
-            <div style="margin-top:20px;">
-                <button onclick="clearCache()" style="color:#999; background:none; border:none; text-decoration:underline; font-size:12px;">重設所有資料 (重新匯入)</button>
+            <button class="btn-reset" onclick="resetAll()">🗑️ 清除所有結果</button>
+            <div style="margin-top:15px;">
+                <button onclick="clearCache()" style="color:#999; background:none; border:none; text-decoration:underline; font-size:12px;">重新匯入資料</button>
             </div>
         </div>
+    </div>
+
+    <div id="custom-keyboard">
+        <button class="kb-key k-abc" onclick="typeKey('A')">A</button>
+        <button class="kb-key k-num" onclick="typeKey('1')">1</button>
+        <button class="kb-key k-num" onclick="typeKey('2')">2</button>
+        <button class="kb-key k-num" onclick="typeKey('3')">3</button>
+        <button class="kb-key k-del" onclick="backspace()">⌫</button>
+
+        <button class="kb-key k-abc" onclick="typeKey('B')">B</button>
+        <button class="kb-key k-num" onclick="typeKey('4')">4</button>
+        <button class="kb-key k-num" onclick="typeKey('5')">5</button>
+        <button class="kb-key k-num" onclick="typeKey('6')">6</button>
+        <button class="kb-key k-num" onclick="typeKey('0')">0</button>
+
+        <button class="kb-key k-abc" onclick="typeKey('C')">C</button>
+        <button class="kb-key k-num" onclick="typeKey('7')">7</button>
+        <button class="kb-key k-num" onclick="typeKey('8')">8</button>
+        <button class="kb-key k-num" onclick="typeKey('9')">9</button>
+        <button class="kb-key k-go" onclick="runSearch()">查詢</button>
     </div>
 
     <div id="modal" class="modal">
@@ -94,52 +174,36 @@
 
     <script>
         let db = {};
-
-        // 錯誤攔截：如果有 JS 錯誤，彈窗通知，防止靜默失敗
-        window.onerror = function(msg, url, line) {
-            alert("系統錯誤: " + msg);
-            return false;
-        };
+        let currentInput = "";
 
         window.onload = function() {
-            try {
-                // 嘗試讀取舊資料
-                const saved = localStorage.getItem('productData_v4'); 
-                if(saved && saved.length > 10) {
-                    if(parseData(saved)) {
-                        switchToSearch();
-                    }
+            const saved = localStorage.getItem('productData_v5'); 
+            if(saved && saved.length > 10) {
+                if(parseData(saved)) {
+                    switchToSearch();
                 }
-            } catch(e) {
-                console.log("LocalStorage Error: " + e);
             }
-            // 如果無資料，預設 CSS 已經係顯示 import-screen，所以唔使做野
         };
 
         function switchToSearch() {
             document.getElementById('import-screen').style.display = 'none';
             document.getElementById('search-screen').style.display = 'block';
-            document.getElementById('inp').focus();
+            
+            // 顯示 Grid 鍵盤
+            const kb = document.getElementById('custom-keyboard');
+            kb.style.display = 'grid';
         }
 
         function saveData() {
             let raw = document.getElementById('data-input').value;
             if(!raw) return alert('請貼上資料！');
-            
-            // 清洗資料
             raw = raw.replace(/^\uFEFF/, '').trim(); 
-            
             if(parseData(raw)) {
-                try {
-                    localStorage.setItem('productData_v4', raw);
-                    alert('✅ 成功匯入！');
-                    switchToSearch();
-                } catch (e) {
-                    alert('⚠️ 無法儲存資料 (可能係隱私模式)，但今次使用無問題。');
-                    switchToSearch();
-                }
+                localStorage.setItem('productData_v5', raw);
+                switchToSearch();
+                alert('✅ 匯入成功！');
             } else {
-                alert('⚠️ 資料格式錯誤或空白！');
+                alert('⚠️ 資料格式錯誤');
             }
         }
 
@@ -147,12 +211,10 @@
             db = {};
             let count = 0;
             const lines = text.split(/\r\n|\n|\r/);
-            
             lines.forEach(line => {
                 if(!line.trim()) return;
                 const cols = line.split('|');
                 if(cols.length < 2) return;
-                
                 const item = {
                     code: cols[0].trim(),
                     name: cols[1] ? cols[1].trim() : '',
@@ -160,33 +222,46 @@
                     cargo: cols[3] ? cols[3].trim() : '',
                     group: cols[4] ? cols[4].trim() : ''
                 };
-
                 let k = item.code.toLowerCase();
                 if(!db[k]) db[k] = [];
                 db[k].push(item);
                 count++;
             });
-
             document.getElementById('db-count').innerText = count;
             return count > 0;
         }
 
-        const inp = document.getElementById('inp');
-        inp.addEventListener('keydown', (e) => { 
-            if(e.key==='Enter' || e.keyCode===13) {
-                e.preventDefault(); 
-                runSearch();
+        // === 鍵盤邏輯 ===
+        function typeKey(char) {
+            if (currentInput.length < 6) {
+                currentInput += char;
+                updateDisplay();
             }
-        });
+        }
+
+        function backspace() {
+            if(currentInput.length > 0) {
+                currentInput = currentInput.slice(0, -1);
+                updateDisplay();
+            }
+        }
+
+        function clearInput() {
+            currentInput = "";
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('display-box').innerText = currentInput;
+        }
 
         function runSearch() {
-            const val = inp.value.trim().toLowerCase();
+            const val = currentInput.trim().toLowerCase();
             if(!val) return;
             
             const res = db[val];
             if(!res) {
-                alert('⚠️ 找不到代碼: ' + inp.value);
-                inp.select();
+                alert('⚠️ 找不到代碼: ' + currentInput);
                 return;
             }
 
@@ -194,10 +269,9 @@
             
             if(groups.length === 1) { 
                 add(res); 
-                inp.value=''; 
-                inp.focus();
+                clearInput(); // 查完自動清空
             } else { 
-                openM(inp.value.toUpperCase(), groups, res); 
+                openM(currentInput.toUpperCase(), groups, res); 
             }
         }
 
@@ -234,29 +308,27 @@
                 btn.onclick = () => { 
                     add(items.filter(i=>i.group===g)); 
                     closeM(); 
-                    inp.value=''; 
-                    inp.focus(); 
+                    clearInput();
                 };
                 list.appendChild(btn);
             });
             m.style.display = 'flex';
         }
         
-        function closeM() { document.getElementById('modal').style.display = 'none'; inp.focus(); }
+        function closeM() { document.getElementById('modal').style.display = 'none'; }
         
         function resetAll() { 
-            if(document.getElementById('tb-a').innerHTML === '' && document.getElementById('tb-b').innerHTML === '' && document.getElementById('tb-c').innerHTML === '') return;
-            if(!confirm('確定清除所有結果？')) return;
-            document.getElementById('tb-a').innerHTML=''; 
-            document.getElementById('tb-b').innerHTML=''; 
-            document.getElementById('tb-c').innerHTML=''; 
-            inp.value=''; 
-            inp.focus(); 
+            if(confirm('確定清除所有結果？')) {
+                document.getElementById('tb-a').innerHTML=''; 
+                document.getElementById('tb-b').innerHTML=''; 
+                document.getElementById('tb-c').innerHTML=''; 
+                clearInput();
+            }
         }
 
         function clearCache() {
-            if(confirm('警告：這將會清除所有已匯入的資料，需要重新貼上。確定？')) {
-                localStorage.removeItem('productData_v4');
+            if(confirm('警告：確定要重新匯入資料？')) {
+                localStorage.removeItem('productData_v5');
                 location.reload();
             }
         }
