@@ -3,9 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SET SALE CODE 系統 (V8)</title>
+    <title>SET SALE CODE 系統 (V9)</title>
     <style>
-        :root { --bg: #f2f2f7; --card: #ffffff; --blue: #007aff; --text: #000000; --red: #ff3b30; --key-light: #ffffff; --key-dark: #b2b2b2; }
+        /* 定義顏色變數 */
+        :root { 
+            --bg: #f2f2f7; 
+            --card: #ffffff; 
+            --text: #000000; 
+            --red: #ff3b30;       /* 通用紅色 */
+            --blue: #007aff;      /* 通用藍色 */
+            --green: #34c759;     /* 通用綠色 */
+            --key-light: #ffffff; 
+            --key-dark: #b2b2b2; 
+
+            /* 組別顏色設定 */
+            --color-a: #ff3b30;   /* A組改為紅色 */
+            --color-b: #34c759;   /* B組維持綠色 */
+            --color-c: #007aff;   /* C組改為藍色 */
+        }
+
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 320px; user-select: none; -webkit-user-select: none; }
         
         /* 匯入畫面 */
@@ -47,7 +63,11 @@
         .list-box { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
         .card { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .card-head { padding: 10px 15px; color: white; font-weight: 600; font-size: 15px; }
-        .bg-a { background: #007aff; } .bg-b { background: #34c759; } .bg-c { background: #ff9500; }
+        
+        /* 應用新顏色到標題 */
+        .bg-a { background: var(--color-a); } 
+        .bg-b { background: var(--color-b); } 
+        .bg-c { background: var(--color-c); }
         
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 15px; border-bottom: 1px solid #e5e5ea; vertical-align: top; }
@@ -114,10 +134,10 @@
 <body>
 
     <div id="import-screen">
-        <h2>📥 系統設定 (V8)</h2>
-        <p style="color:#8e8e93; font-size:13px;">請貼上純文字資料...</p>
-        <textarea id="data-input" placeholder="A1|產品|型號|Code..."></textarea>
-        <button class="btn-save" onclick="saveData()">✅ 確認匯入</button>
+        <h2>📥 系統設定 (V9)</h2>
+        <p style="color:#8e8e93; font-size:13px;">請與管理員聯絡</p>
+        <textarea id="data-input" placeholder=""></textarea>
+        <button class="btn-save" onclick="saveData()">確定</button>
     </div>
 
     <div id="search-screen">
@@ -219,7 +239,6 @@
                 if (currentInput.length > 0) {
                     currentInput = currentInput.slice(0, -1);
                 }
-                // 注意：這裡移除了 resetList()，刪除字元不會清空結果
             } else if (key === 'GO') {
                 playTone('go');
                 runSearch();
@@ -232,7 +251,7 @@
         }
 
         window.onload = function() {
-            const saved = localStorage.getItem('productData_v8'); 
+            const saved = localStorage.getItem('productData_v9'); 
             if(saved && saved.length > 10) {
                 if(parseData(saved)) switchToSearch();
             }
@@ -249,7 +268,7 @@
             if(!raw) return alert('請貼上資料！');
             raw = raw.replace(/^\uFEFF/, '').trim(); 
             if(parseData(raw)) {
-                localStorage.setItem('productData_v8', raw);
+                localStorage.setItem('productData_v9', raw);
                 switchToSearch();
                 alert('✅ 匯入成功！');
             } else {
@@ -327,7 +346,7 @@
                     <td class="code">${i.code}</td>
                     <td>
                         <div class="info">${i.name}</div>
-                        <div style="color:#007aff;font-size:0.9em;margin-top:2px;font-weight:500;">${i.model}</div>
+                        <div style="color:var(--blue);font-size:0.9em;margin-top:2px;font-weight:500;">${i.model}</div>
                         <span class="tag">${i.cargo}</span>
                     </td>
                 `;
@@ -368,7 +387,7 @@
 
         function clearCache() {
             if(confirm('重設將會清除現有資料，確定？')) {
-                localStorage.removeItem('productData_v8');
+                localStorage.removeItem('productData_v9');
                 location.reload();
             }
         }
