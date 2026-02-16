@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SET SALE CODE 系統 (V12)</title>
+    <title>SET SALE CODE 系統 (V13)</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-title" content="查貨Code">
@@ -23,16 +23,52 @@
         #import-screen { display: block; text-align: center; padding: 20px; }
         textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #c7c7cc; border-radius: 10px; font-family: monospace; box-sizing: border-box; background: #fff; }
         .btn-save { background: #34c759; color: white; padding: 12px; border: none; border-radius: 10px; font-size: 17px; margin-top: 15px; width: 100%; font-weight: 600; }
-        .btn-save:active { background: #28a745; }
 
         #search-screen { display: none; }
         .header { background: var(--card); padding: 15px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; position: sticky; top: 10px; z-index: 50; }
         h2 { margin: 0 0 5px 0; font-size: 1.2rem; color: #1c1c1e; }
         .db-info { font-size: 13px; color: #8e8e93; margin-bottom: 8px; }
 
-        .input-display { width: 160px; margin: 0 auto; background: #e5e5ea; border: none; border-radius: 10px; padding: 12px; font-size: 28px; font-weight: 600; text-align: center; letter-spacing: 1px; color: #000; min-height: 40px; }
+        /* 搜尋框容器 (為了放那個 X) */
+        .input-wrapper { position: relative; width: 160px; margin: 0 auto; }
+        
+        .input-display { 
+            width: 100%; 
+            background: #e5e5ea; 
+            border: none; 
+            border-radius: 10px; 
+            padding: 12px; 
+            padding-right: 35px; /* 留位俾個 X */
+            font-size: 28px; 
+            font-weight: 600; 
+            text-align: center; 
+            letter-spacing: 1px; 
+            color: #000; 
+            min-height: 40px; 
+            box-sizing: border-box;
+        }
         .input-display.active::after { content: '|'; animation: blink 1s step-start infinite; color: var(--blue); margin-left: 2px; font-weight: normal; }
         @keyframes blink { 50% { opacity: 0; } }
+
+        /* 細交叉按鈕 */
+        .clear-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: #8e8e93;
+            color: white;
+            border-radius: 50%;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            visibility: hidden; /* 無字時隱藏 */
+        }
+        .clear-btn.visible { visibility: visible; }
 
         .list-box { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
         .card { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -47,19 +83,29 @@
         .swipe-scroll::-webkit-scrollbar { display: none; }
         .swipe-content { flex: 0 0 100%; scroll-snap-align: start; display: flex; padding: 12px 10px; background: #fff; box-sizing: border-box; }
         .swipe-action { flex: 0 0 80px; scroll-snap-align: end; background: var(--red); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; cursor: pointer; }
-        .swipe-action:active { background: #d32f2f; }
 
         .code { font-weight: 700; font-family: monospace; font-size: 1.3em; width: 50px; flex-shrink: 0; color: #1c1c1e; }
         .content-cell { display: flex; justify-content: space-between; align-items: flex-start; flex: 1; }
-        .info-col { padding-right: 10px; flex: 1; }
+        .info-col { padding-right: 5px; flex: 1; }
         .info { font-size: 16px; font-weight: 500; line-height: 1.3; margin-bottom: 4px; word-wrap: break-word; }
         .model-txt { color: var(--blue); font-size: 0.9em; margin-top: 2px; font-weight: 500; }
+        
+        /* ❗️ 注意事項 Icon */
+        .note-icon { 
+            display: inline-block; 
+            font-size: 18px; 
+            margin-left: 5px; 
+            cursor: pointer; 
+            animation: bounce 2s infinite; 
+        }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-5px);} 60% {transform: translateY(-3px);} }
+
         .tag { display: inline-block; background: #f2f2f7; padding: 3px 8px; border-radius: 6px; font-size: 13px; color: #8e8e93; font-weight: 500; margin-top: 4px; }
 
         .chk-col { display: flex; gap: 8px; flex-shrink: 0; }
         .chk-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .chk-label { font-size: 11px; font-weight: 700; color: #8e8e93; margin-bottom: 2px; }
-        input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 24px; height: 24px; border: 2px solid #c7c7cc; border-radius: 4px; background-color: white; cursor: pointer; position: relative; }
+        input[type="checkbox"] { appearance: none; width: 24px; height: 24px; border: 2px solid #c7c7cc; border-radius: 4px; background-color: white; position: relative; }
         input[type="checkbox"]:checked { background-color: var(--blue); border-color: var(--blue); }
         input[type="checkbox"]:checked::after { content: '✔'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 16px; }
 
@@ -67,7 +113,7 @@
         .btn-reset { background: var(--red); color: white; border: none; padding: 12px 40px; border-radius: 25px; font-size: 15px; font-weight: 600; }
 
         #custom-keyboard { position: fixed; bottom: 0; left: 0; width: 100%; background: #d1d5db; backdrop-filter: blur(10px); padding: 6px; padding-bottom: 25px; box-sizing: border-box; z-index: 1000; display: none; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-        .kb-key { background: var(--key-light); color: #000; border: none; border-radius: 5px; height: 52px; font-size: 22px; font-weight: 400; box-shadow: 0 1px 0 #898a8d; cursor: pointer; -webkit-tap-highlight-color: transparent; display: flex; align-items: center; justify-content: center; }
+        .kb-key { background: var(--key-light); color: #000; border: none; border-radius: 5px; height: 52px; font-size: 22px; font-weight: 400; box-shadow: 0 1px 0 #898a8d; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .kb-key:active { background: #e5e5ea; }
         .k-abc { font-weight: 500; } .k-num { font-weight: 400; font-size: 24px; }
         .k-del { background: #adb3bc; color: #000; font-size: 18px; } .k-del:active { background: #fff; }
@@ -77,12 +123,16 @@
         .modal-box { background: #f2f2f7; padding: 20px; border-radius: 14px; width: 85%; max-width: 300px; text-align: center; max-height: 70vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .opt-btn { width: 100%; margin: 6px 0; padding: 14px; font-size: 16px; background: #fff; border: none; border-radius: 10px; text-align: center; color: var(--blue); font-weight: 500; }
         .opt-btn:active { background: #e5e5ea; }
+        
+        /* 注意事項標題 */
+        #alert-title { font-size: 1.2rem; color: var(--red); margin-bottom: 10px; display: block; }
+        #alert-msg { font-size: 1.1rem; color: #333; line-height: 1.5; white-space: pre-wrap; }
     </style>
 </head>
 <body>
 
     <div id="import-screen">
-        <h2>📥 系統設定 (V12)</h2>
+        <h2>📥 系統設定 (V13)</h2>
         <p style="color:#8e8e93; font-size:13px;">請與管理員聯絡</p>
         <textarea id="data-input" placeholder=""></textarea>
         <button class="btn-save" onclick="saveData()">確定</button>
@@ -91,8 +141,12 @@
     <div id="search-screen">
         <div class="header">
             <h2>SET SALE CODE</h2>
-            <div class="db-info">資料庫: <span id="db-count">0</span> 筆 | 💡 提示: 項目向左滑動可刪除</div>
-            <div id="display-box" class="input-display active" onclick="clearInput()"></div>
+            <div class="db-info">資料庫: <span id="db-count">0</span> 筆 | 左滑刪除</div>
+            
+            <div class="input-wrapper">
+                <div id="display-box" class="input-display active" onclick="focusInput()"></div>
+                <div id="clear-btn" class="clear-btn" onclick="clearInput()">✕</div>
+            </div>
         </div>
 
         <div class="list-box">
@@ -102,7 +156,7 @@
         </div>
 
         <div class="footer-action">
-            <button class="btn-reset" onclick="resetAll()">🗑️ 清除所有結果</button>
+            <button class="btn-reset" onclick="resetAll()">🗑️ 清除結果</button>
             <div style="margin-top:20px;">
                 <button onclick="clearCache()" style="color:#8e8e93; background:none; border:none; text-decoration:underline; font-size:13px;">重新匯入資料</button>
             </div>
@@ -131,207 +185,115 @@
 
     <div id="modal" class="modal">
         <div class="modal-box">
-            <h3 style="margin-top:0; color:#000;">請選擇版本</h3>
             <b id="m-code" style="font-size:1.6em; color:var(--blue); display:block; margin-bottom:15px;"></b>
+            
+            <div id="alert-area" style="display:none; text-align:left; margin-bottom:15px;">
+                <b id="alert-title">⚠️ 注意事項</b>
+                <span id="alert-msg"></span>
+            </div>
+
             <div id="m-list"></div>
-            <button onclick="closeM()" style="margin-top:15px; background:#fff; color:var(--red); padding:12px; width:100%; border:none; border-radius:10px; font-weight:600;">取消</button>
+            <button onclick="closeM()" style="margin-top:15px; background:#fff; color:var(--red); padding:12px; width:100%; border:none; border-radius:10px; font-weight:600;">關閉</button>
         </div>
     </div>
 
     <script>
-        // 捕捉所有系統錯誤，防止死機無反應
-        window.onerror = function(msg, url, line) {
-            alert("系統出現異常: " + msg);
-            return false;
-        };
-
+        window.onerror = function(msg) { alert("系統異常: " + msg); return false; };
         let db = {};
         let currentInput = "";
         let audioCtx = null;
         
-        function initAudio() {
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if(audioCtx.state === 'suspended') audioCtx.resume();
-        }
-
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
         function playTone(type) {
-            try {
-                initAudio();
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-
-                if(type === 'click') {
-                    osc.frequency.setValueAtTime(500, audioCtx.currentTime); 
-                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.03);
-                    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
-                } else if(type === 'del') {
-                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-                    gainNode.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                } else if(type === 'go') {
-                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                } else if(type === 'trash') {
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
-                    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                }
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
-            } catch(e) {}
+            try { initAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
+            if(type==='click'){o.frequency.value=500;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.03);}
+            else if(type==='del'){o.frequency.value=300;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.05);}
+            else if(type==='go'){o.frequency.value=800;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.1);}
+            else if(type==='trash'){o.type='square';o.frequency.value=150;g.gain.value=0.2;o.start();o.stop(audioCtx.currentTime+0.1);}
+            } catch(e){}
         }
-
-        function triggerVibration() { 
-            try { if (navigator.vibrate) navigator.vibrate(10); } catch(e) {}
-        }
+        function triggerVibration() { try { if (navigator.vibrate) navigator.vibrate(10); } catch(e) {} }
 
         function tap(key) {
-            event.preventDefault(); // 防止手機出現 double-tap zoom
-            triggerVibration();
-            if (key === 'DEL') {
-                playTone('del');
-                if (currentInput.length > 0) currentInput = currentInput.slice(0, -1);
-            } else if (key === 'GO') {
-                playTone('go');
-                runSearch();
-                return;
-            } else {
-                playTone('click');
-                if (currentInput.length < 6) currentInput += key;
-            }
-            document.getElementById('display-box').innerText = currentInput;
+            event.preventDefault(); triggerVibration();
+            if (key === 'DEL') { playTone('del'); if (currentInput.length > 0) currentInput = currentInput.slice(0, -1); } 
+            else if (key === 'GO') { playTone('go'); runSearch(); return; } 
+            else { playTone('click'); if (currentInput.length < 6) currentInput += key; }
+            updateDisplay();
         }
 
         window.onload = function() {
-            try {
-                const saved = localStorage.getItem('productData_v12'); 
-                if(saved && saved.length > 10) {
-                    if(parseData(saved)) switchToSearch();
-                }
-            } catch(e) {
-                console.log("Local storage read blocked.");
-            }
+            try { const saved = localStorage.getItem('productData_v13'); if(saved && saved.length > 10) if(parseData(saved)) switchToSearch(); } catch(e){}
         };
 
-        function switchToSearch() {
-            document.getElementById('import-screen').style.display = 'none';
-            document.getElementById('search-screen').style.display = 'block';
-            document.getElementById('custom-keyboard').style.display = 'grid';
-        }
-
+        function switchToSearch() { document.getElementById('import-screen').style.display = 'none'; document.getElementById('search-screen').style.display = 'block'; document.getElementById('custom-keyboard').style.display = 'grid'; }
         function saveData() {
-            try {
-                let raw = document.getElementById('data-input').value;
-                if(!raw || raw.trim() === "") {
-                    alert('請貼上資料！');
-                    return;
-                }
-                raw = raw.replace(/^\uFEFF/, '').trim(); 
-                
-                if(parseData(raw)) {
-                    // 嘗試儲存，無痕模式會跳入 catch，但程式唔會死
-                    try {
-                        localStorage.setItem('productData_v12', raw);
-                    } catch(e) {
-                        alert('⚠️ 系統偵測到無痕模式或儲存限制。\n本次查詢仍可正常使用，但下次開啟時需要重新匯入資料。');
-                    }
-                    switchToSearch();
-                } else {
-                    alert('⚠️ 系統無法識別資料格式。\n請確保資料為 A1|產品|型號|Code 格式。');
-                }
-            } catch(error) {
-                alert('處理資料時發生嚴重錯誤: ' + error.message);
-            }
+            try { let raw = document.getElementById('data-input').value; raw = raw.replace(/^\uFEFF/, '').trim(); 
+            if(parseData(raw)) { try { localStorage.setItem('productData_v13', raw); } catch(e) {} switchToSearch(); } else { alert('資料格式錯誤'); }
+            } catch(e) { alert(e.message); }
         }
 
         function parseData(text) {
-            db = {};
-            let count = 0;
-            const lines = text.split(/\r\n|\n|\r/);
+            db = {}; let count = 0; const lines = text.split(/\r\n|\n|\r/);
             lines.forEach(line => {
                 if(!line.trim()) return;
                 const cols = line.split('|');
                 if(cols.length < 2) return;
                 const item = {
-                    code: cols[0].trim(),
-                    name: cols[1] ? cols[1].trim() : '',
-                    model: cols[2] ? cols[2].trim() : '',
-                    cargo: cols[3] ? cols[3].trim() : '',
-                    group: cols[4] ? cols[4].trim() : ''
+                    code: cols[0].trim(), name: cols[1]||'', model: cols[2]||'', cargo: cols[3]||'', group: cols[4]||'',
+                    note: cols[5] ? cols[5].trim() : '' // 第6欄: 注意事項
                 };
-                let k = item.code.toLowerCase();
-                if(!db[k]) db[k] = [];
-                db[k].push(item);
-                count++;
+                let k = item.code.toLowerCase(); if(!db[k]) db[k] = []; db[k].push(item); count++;
             });
-            document.getElementById('db-count').innerText = count;
-            return count > 0;
+            document.getElementById('db-count').innerText = count; return count > 0;
+        }
+
+        function updateDisplay() {
+            document.getElementById('display-box').innerText = currentInput;
+            // 顯示或隱藏交叉掣
+            document.getElementById('clear-btn').className = currentInput.length > 0 ? 'clear-btn visible' : 'clear-btn';
         }
 
         function clearInput() {
-            currentInput = "";
-            document.getElementById('display-box').innerText = currentInput;
+            currentInput = ""; playTone('del'); updateDisplay();
+        }
+        
+        function focusInput() {
+            // 純視覺效果
         }
 
         function runSearch() {
-            const val = currentInput.trim().toLowerCase();
-            if(!val) return;
+            const val = currentInput.trim().toLowerCase(); if(!val) return;
             const res = db[val];
-            
-            if(!res) {
-                if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-                alert('⚠️ 找不到: ' + currentInput);
-                return;
-            }
-
+            if(!res) { if(navigator.vibrate) navigator.vibrate([30,50,30]); alert('⚠️ 找不到: ' + currentInput); return; }
             const groups = [...new Set(res.map(i => i.group))];
-            if(groups.length === 1) { 
-                add(res); 
-                clearInput(); 
-            } else { 
-                openM(currentInput.toUpperCase(), groups, res); 
-            }
+            if(groups.length === 1) { add(res); clearInput(); } else { openM(currentInput.toUpperCase(), groups, res); }
         }
 
-        function resetList() {
-            document.getElementById('tb-a').innerHTML=''; 
-            document.getElementById('tb-b').innerHTML=''; 
-            document.getElementById('tb-c').innerHTML=''; 
-        }
-
-        function deleteBatch(batchId) {
-            playTone('trash');
-            if(navigator.vibrate) navigator.vibrate(20);
-            
-            const itemsToDelete = document.querySelectorAll('.' + batchId);
-            itemsToDelete.forEach(el => {
-                el.classList.add('deleting');
-                setTimeout(() => { el.remove(); }, 300);
-            });
-        }
+        function resetList() { document.getElementById('tb-a').innerHTML=''; document.getElementById('tb-b').innerHTML=''; document.getElementById('tb-c').innerHTML=''; }
+        function deleteBatch(id) { playTone('trash'); if(navigator.vibrate) navigator.vibrate(20); document.querySelectorAll('.'+id).forEach(el => { el.classList.add('deleting'); setTimeout(()=>el.remove(),300); }); }
 
         function add(items) {
-            const batchId = 'batch-' + Date.now(); 
-
+            const bid = 'batch-' + Date.now();
             items.forEach(i => {
-                let tid = 'tb-c';
-                const c = i.code.charAt(0).toLowerCase();
-                if(c==='a') tid='tb-a'; if(c==='b') tid='tb-b';
+                let tid = 'tb-c'; const c = i.code.charAt(0).toLowerCase(); if(c==='a') tid='tb-a'; if(c==='b') tid='tb-b';
                 
-                const row = document.createElement('div');
-                row.className = `swipe-container ${batchId}`;
-                
+                // 檢查有無注意事項
+                let noteHtml = '';
+                if(i.note && i.note !== "") {
+                    // 將注意事項經過 encode 傳入 onclick，防止引號出錯
+                    const safeNote = i.note.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                    noteHtml = `<span class="note-icon" onclick="showAlert('${safeNote}')">❗️</span>`;
+                }
+
+                const row = document.createElement('div'); row.className = `swipe-container ${bid}`;
                 row.innerHTML = `
                     <div class="swipe-scroll">
                         <div class="swipe-content">
                             <div class="code">${i.code}</div>
                             <div class="content-cell">
                                 <div class="info-col">
-                                    <div class="info">${i.name}</div>
+                                    <div class="info">${i.name} ${noteHtml}</div>
                                     <div class="model-txt">型號: ${i.model}</div>
                                     <span class="tag">${i.cargo}</span>
                                 </div>
@@ -341,31 +303,38 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="swipe-action" onclick="deleteBatch('${batchId}')">刪除</div>
+                        <div class="swipe-action" onclick="deleteBatch('${bid}')">刪除</div>
                     </div>
                 `;
-                
-                const tb = document.getElementById(tid);
-                tb.insertBefore(row, tb.firstChild);
+                const tb = document.getElementById(tid); tb.insertBefore(row, tb.firstChild);
             });
         }
 
+        // 開啟注意事項 Modal
+        function showAlert(msg) {
+            event.stopPropagation(); // 防止觸發其他點擊
+            const m = document.getElementById('modal');
+            document.getElementById('m-code').innerText = ''; // 隱藏標題
+            document.getElementById('m-list').innerHTML = ''; // 隱藏列表
+            
+            document.getElementById('alert-area').style.display = 'block';
+            document.getElementById('alert-msg').innerText = msg;
+            
+            m.style.display = 'flex';
+        }
+
+        // 開啟分組 Modal
         function openM(code, groups, items) {
             const m = document.getElementById('modal');
             const list = document.getElementById('m-list');
+            document.getElementById('alert-area').style.display = 'none'; // 隱藏注意事項
             document.getElementById('m-code').innerText = code;
+            
             list.innerHTML = '';
             groups.forEach(g => {
-                const btn = document.createElement('button');
-                btn.className = 'opt-btn';
+                const btn = document.createElement('button'); btn.className = 'opt-btn';
                 btn.innerHTML = `<b>${g || '標準版 / 套裝'}</b>`;
-                btn.onclick = () => { 
-                    playTone('click');
-                    triggerVibration();
-                    add(items.filter(i=>i.group===g)); 
-                    closeM(); 
-                    clearInput();
-                };
+                btn.onclick = () => { playTone('click'); triggerVibration(); add(items.filter(i=>i.group===g)); closeM(); clearInput(); };
                 list.appendChild(btn);
             });
             m.style.display = 'flex';
@@ -373,19 +342,8 @@
         
         function closeM() { document.getElementById('modal').style.display = 'none'; }
         
-        function resetAll() { 
-            if(confirm('清除所有結果？')) {
-                resetList();
-                clearInput();
-            }
-        }
-
-        function clearCache() {
-            if(confirm('確定要清除手機內的快取並重新匯入資料？')) {
-                try { localStorage.removeItem('productData_v12'); } catch(e) {}
-                location.reload();
-            }
-        }
+        function resetAll() { if(confirm('清除所有結果？')) { resetList(); clearInput(); } }
+        function clearCache() { if(confirm('重設將會清除資料，確定？')) { try{localStorage.removeItem('productData_v13');}catch(e){} location.reload(); } }
     </script>
 </body>
 </html>
