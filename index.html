@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SET SALE CODE 系統 (V13)</title>
+    <title>SET SALE CODE 系統 (V14)</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-title" content="查貨Code">
@@ -20,54 +20,33 @@
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 320px; user-select: none; -webkit-user-select: none; }
         
-        #import-screen { display: block; text-align: center; padding: 20px; }
-        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #c7c7cc; border-radius: 10px; font-family: monospace; box-sizing: border-box; background: #fff; }
-        .btn-save { background: #34c759; color: white; padding: 12px; border: none; border-radius: 10px; font-size: 17px; margin-top: 15px; width: 100%; font-weight: 600; }
+        /* 隱藏匯入畫面，改用設定按鈕 */
+        #settings-panel { display: none; text-align: center; padding: 20px; background: #fff; border-radius: 14px; margin-bottom: 20px; }
+        
+        /* 狀態列 */
+        .status-bar { 
+            background: #e5e5ea; color: #333; padding: 10px; 
+            border-radius: 10px; text-align: center; font-size: 13px; margin-bottom: 15px; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-sync { 
+            background: var(--blue); color: white; border: none; 
+            padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 13px; cursor: pointer; 
+        }
+        .btn-sync:active { opacity: 0.7; }
 
-        #search-screen { display: none; }
+        /* 查詢畫面 */
+        #search-screen { display: block; }
         .header { background: var(--card); padding: 15px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; position: sticky; top: 10px; z-index: 50; }
         h2 { margin: 0 0 5px 0; font-size: 1.2rem; color: #1c1c1e; }
         .db-info { font-size: 13px; color: #8e8e93; margin-bottom: 8px; }
 
-        /* 搜尋框容器 (為了放那個 X) */
         .input-wrapper { position: relative; width: 160px; margin: 0 auto; }
-        
-        .input-display { 
-            width: 100%; 
-            background: #e5e5ea; 
-            border: none; 
-            border-radius: 10px; 
-            padding: 12px; 
-            padding-right: 35px; /* 留位俾個 X */
-            font-size: 28px; 
-            font-weight: 600; 
-            text-align: center; 
-            letter-spacing: 1px; 
-            color: #000; 
-            min-height: 40px; 
-            box-sizing: border-box;
-        }
+        .input-display { width: 100%; background: #e5e5ea; border: none; border-radius: 10px; padding: 12px; padding-right: 35px; font-size: 28px; font-weight: 600; text-align: center; letter-spacing: 1px; color: #000; min-height: 40px; box-sizing: border-box; }
         .input-display.active::after { content: '|'; animation: blink 1s step-start infinite; color: var(--blue); margin-left: 2px; font-weight: normal; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* 細交叉按鈕 */
-        .clear-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background: #8e8e93;
-            color: white;
-            border-radius: 50%;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            visibility: hidden; /* 無字時隱藏 */
-        }
+        .clear-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: #8e8e93; color: white; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; visibility: hidden; }
         .clear-btn.visible { visibility: visible; }
 
         .list-box { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
@@ -89,17 +68,8 @@
         .info-col { padding-right: 5px; flex: 1; }
         .info { font-size: 16px; font-weight: 500; line-height: 1.3; margin-bottom: 4px; word-wrap: break-word; }
         .model-txt { color: var(--blue); font-size: 0.9em; margin-top: 2px; font-weight: 500; }
-        
-        /* ❗️ 注意事項 Icon */
-        .note-icon { 
-            display: inline-block; 
-            font-size: 18px; 
-            margin-left: 5px; 
-            cursor: pointer; 
-            animation: bounce 2s infinite; 
-        }
+        .note-icon { display: inline-block; font-size: 18px; margin-left: 5px; cursor: pointer; animation: bounce 2s infinite; }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-5px);} 60% {transform: translateY(-3px);} }
-
         .tag { display: inline-block; background: #f2f2f7; padding: 3px 8px; border-radius: 6px; font-size: 13px; color: #8e8e93; font-weight: 500; margin-top: 4px; }
 
         .chk-col { display: flex; gap: 8px; flex-shrink: 0; }
@@ -123,25 +93,33 @@
         .modal-box { background: #f2f2f7; padding: 20px; border-radius: 14px; width: 85%; max-width: 300px; text-align: center; max-height: 70vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .opt-btn { width: 100%; margin: 6px 0; padding: 14px; font-size: 16px; background: #fff; border: none; border-radius: 10px; text-align: center; color: var(--blue); font-weight: 500; }
         .opt-btn:active { background: #e5e5ea; }
-        
-        /* 注意事項標題 */
         #alert-title { font-size: 1.2rem; color: var(--red); margin-bottom: 10px; display: block; }
         #alert-msg { font-size: 1.1rem; color: #333; line-height: 1.5; white-space: pre-wrap; }
+        
+        .config-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div id="import-screen">
-        <h2>📥 系統設定 (V13)</h2>
-        <p style="color:#8e8e93; font-size:13px;">請與管理員聯絡</p>
-        <textarea id="data-input" placeholder=""></textarea>
-        <button class="btn-save" onclick="saveData()">確定</button>
+    <div id="settings-panel" style="display:none;">
+        <h3>⚙️ 連結設定</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:10px;">請貼上 Google Sheet CSV 連結</p>
+        <input type="text" id="sheet-url" class="config-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
+        <button class="btn-save" onclick="saveConfig()">儲存設定</button>
+        <br><br>
+        <button onclick="closeSettings()" style="background:none; border:none; color:#999; text-decoration:underline;">關閉</button>
     </div>
 
     <div id="search-screen">
+        
+        <div class="status-bar">
+            <span id="last-update">等待更新...</span>
+            <button class="btn-sync" onclick="syncData()">🔄 更新資料</button>
+        </div>
+
         <div class="header">
             <h2>SET SALE CODE</h2>
-            <div class="db-info">資料庫: <span id="db-count">0</span> 筆 | 左滑刪除</div>
+            <div class="db-info">資料庫: <span id="db-count">0</span> 筆</div>
             
             <div class="input-wrapper">
                 <div id="display-box" class="input-display active" onclick="focusInput()"></div>
@@ -158,7 +136,7 @@
         <div class="footer-action">
             <button class="btn-reset" onclick="resetAll()">🗑️ 清除結果</button>
             <div style="margin-top:20px;">
-                <button onclick="clearCache()" style="color:#8e8e93; background:none; border:none; text-decoration:underline; font-size:13px;">重新匯入資料</button>
+                <button onclick="openSettings()" style="color:#8e8e93; background:none; border:none; text-decoration:underline; font-size:13px;">⚙️ 設定資料來源</button>
             </div>
         </div>
     </div>
@@ -186,12 +164,10 @@
     <div id="modal" class="modal">
         <div class="modal-box">
             <b id="m-code" style="font-size:1.6em; color:var(--blue); display:block; margin-bottom:15px;"></b>
-            
             <div id="alert-area" style="display:none; text-align:left; margin-bottom:15px;">
                 <b id="alert-title">⚠️ 注意事項</b>
                 <span id="alert-msg"></span>
             </div>
-
             <div id="m-list"></div>
             <button onclick="closeM()" style="margin-top:15px; background:#fff; color:var(--red); padding:12px; width:100%; border:none; border-radius:10px; font-weight:600;">關閉</button>
         </div>
@@ -202,7 +178,123 @@
         let db = {};
         let currentInput = "";
         let audioCtx = null;
-        
+        let csvUrl = localStorage.getItem('sheet_url_v14') || "";
+
+        // 初始化
+        window.onload = function() {
+            // 嘗試讀取本地快取資料
+            const savedData = localStorage.getItem('productData_v14');
+            const savedTime = localStorage.getItem('updateTime_v14');
+            
+            if(savedData) {
+                parseData(savedData);
+                document.getElementById('last-update').innerText = "最後更新: " + (savedTime || "未知");
+            } else {
+                if(!csvUrl) openSettings(); // 如果無資料又無Link，就打開設定
+                else syncData(); // 有Link就自動下載
+            }
+            document.getElementById('custom-keyboard').style.display = 'grid';
+        };
+
+        // --- 雲端同步核心邏輯 ---
+        function syncData() {
+            if(!csvUrl) { alert("請先設定 Google Sheet 連結！"); openSettings(); return; }
+            
+            document.querySelector('.btn-sync').innerText = "下載中...";
+            
+            fetch(csvUrl)
+            .then(response => {
+                if (!response.ok) throw new Error("網絡錯誤");
+                return response.text();
+            })
+            .then(text => {
+                // 成功下載
+                const now = new Date().toLocaleString();
+                localStorage.setItem('productData_v14', text);
+                localStorage.setItem('updateTime_v14', now);
+                parseData(text);
+                document.getElementById('last-update').innerText = "最後更新: " + now;
+                document.querySelector('.btn-sync').innerText = "✅ 更新成功";
+                setTimeout(() => document.querySelector('.btn-sync').innerText = "🔄 更新資料", 2000);
+            })
+            .catch(error => {
+                alert("❌ 更新失敗：無法讀取 Google Sheet。\n請檢查連結是否正確及已發佈為 CSV。");
+                document.querySelector('.btn-sync').innerText = "🔄 更新資料";
+            });
+        }
+
+        // --- 設定面板 ---
+        function openSettings() {
+            document.getElementById('settings-panel').style.display = 'block';
+            document.getElementById('search-screen').style.display = 'none';
+            document.getElementById('sheet-url').value = csvUrl;
+        }
+        function closeSettings() {
+            document.getElementById('settings-panel').style.display = 'none';
+            document.getElementById('search-screen').style.display = 'block';
+        }
+        function saveConfig() {
+            const url = document.getElementById('sheet-url').value.trim();
+            if(url) {
+                csvUrl = url;
+                localStorage.setItem('sheet_url_v14', url);
+                closeSettings();
+                syncData(); // 儲存後立即嘗試同步
+            } else {
+                alert("請輸入連結");
+            }
+        }
+
+        // --- 解析 Google Sheet CSV ---
+        function parseData(text) {
+            db = {}; let count = 0; 
+            // 處理 CSV 可能的引號同逗號 (簡單處理: 假設 Google Sheet 匯出格式)
+            // 由於 CSV 用逗號分隔，我哋需要將佢轉返做物件
+            // 注意：如果你的 Google Sheet 是標準 CSV，分隔符是逗號 ','
+            // 之前的版本是用 '|'，這裡我們會兼容處理
+            
+            const lines = text.split(/\r\n|\n|\r/);
+            lines.forEach(line => {
+                if(!line.trim()) return;
+                
+                // 判斷是用逗號還是豎線分隔
+                let cols;
+                if(line.includes('|')) {
+                    cols = line.split('|'); // 兼容舊格式
+                } else {
+                    // 簡單 CSV parser (處理逗號)
+                    // 假設無內容包含逗號嘅複雜情況，直接 split
+                    cols = line.split(','); 
+                }
+
+                if(cols.length < 2) return;
+                
+                // 欄位對應: 0:Code, 1:Name, 2:Model, 3:ItemCode, 4:Group, 5:Note
+                // 移除 CSV 可能帶有的引號
+                const clean = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
+                
+                const item = {
+                    code: clean(cols[0]), 
+                    name: clean(cols[1]), 
+                    model: clean(cols[2]), 
+                    cargo: clean(cols[3]), 
+                    group: clean(cols[4]),
+                    note: clean(cols[5])
+                };
+                
+                // 如果是標題列(Code/代碼)，跳過
+                if(item.code.toLowerCase() === 'code' || item.code === '代碼') return;
+
+                let k = item.code.toLowerCase(); 
+                if(!db[k]) db[k] = []; 
+                db[k].push(item); 
+                count++;
+            });
+            document.getElementById('db-count').innerText = count; 
+            return count > 0;
+        }
+
+        // --- 原有功能維持不變 ---
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
         function playTone(type) {
             try { initAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
@@ -222,45 +314,12 @@
             updateDisplay();
         }
 
-        window.onload = function() {
-            try { const saved = localStorage.getItem('productData_v13'); if(saved && saved.length > 10) if(parseData(saved)) switchToSearch(); } catch(e){}
-        };
-
-        function switchToSearch() { document.getElementById('import-screen').style.display = 'none'; document.getElementById('search-screen').style.display = 'block'; document.getElementById('custom-keyboard').style.display = 'grid'; }
-        function saveData() {
-            try { let raw = document.getElementById('data-input').value; raw = raw.replace(/^\uFEFF/, '').trim(); 
-            if(parseData(raw)) { try { localStorage.setItem('productData_v13', raw); } catch(e) {} switchToSearch(); } else { alert('資料格式錯誤'); }
-            } catch(e) { alert(e.message); }
-        }
-
-        function parseData(text) {
-            db = {}; let count = 0; const lines = text.split(/\r\n|\n|\r/);
-            lines.forEach(line => {
-                if(!line.trim()) return;
-                const cols = line.split('|');
-                if(cols.length < 2) return;
-                const item = {
-                    code: cols[0].trim(), name: cols[1]||'', model: cols[2]||'', cargo: cols[3]||'', group: cols[4]||'',
-                    note: cols[5] ? cols[5].trim() : '' // 第6欄: 注意事項
-                };
-                let k = item.code.toLowerCase(); if(!db[k]) db[k] = []; db[k].push(item); count++;
-            });
-            document.getElementById('db-count').innerText = count; return count > 0;
-        }
-
         function updateDisplay() {
             document.getElementById('display-box').innerText = currentInput;
-            // 顯示或隱藏交叉掣
             document.getElementById('clear-btn').className = currentInput.length > 0 ? 'clear-btn visible' : 'clear-btn';
         }
-
-        function clearInput() {
-            currentInput = ""; playTone('del'); updateDisplay();
-        }
-        
-        function focusInput() {
-            // 純視覺效果
-        }
+        function clearInput() { currentInput = ""; playTone('del'); updateDisplay(); }
+        function focusInput() {}
 
         function runSearch() {
             const val = currentInput.trim().toLowerCase(); if(!val) return;
@@ -278,10 +337,8 @@
             items.forEach(i => {
                 let tid = 'tb-c'; const c = i.code.charAt(0).toLowerCase(); if(c==='a') tid='tb-a'; if(c==='b') tid='tb-b';
                 
-                // 檢查有無注意事項
                 let noteHtml = '';
                 if(i.note && i.note !== "") {
-                    // 將注意事項經過 encode 傳入 onclick，防止引號出錯
                     const safeNote = i.note.replace(/"/g, '&quot;').replace(/'/g, "\\'");
                     noteHtml = `<span class="note-icon" onclick="showAlert('${safeNote}')">❗️</span>`;
                 }
@@ -310,26 +367,21 @@
             });
         }
 
-        // 開啟注意事項 Modal
         function showAlert(msg) {
-            event.stopPropagation(); // 防止觸發其他點擊
+            event.stopPropagation();
             const m = document.getElementById('modal');
-            document.getElementById('m-code').innerText = ''; // 隱藏標題
-            document.getElementById('m-list').innerHTML = ''; // 隱藏列表
-            
+            document.getElementById('m-code').innerText = ''; 
+            document.getElementById('m-list').innerHTML = ''; 
             document.getElementById('alert-area').style.display = 'block';
             document.getElementById('alert-msg').innerText = msg;
-            
             m.style.display = 'flex';
         }
 
-        // 開啟分組 Modal
         function openM(code, groups, items) {
             const m = document.getElementById('modal');
             const list = document.getElementById('m-list');
-            document.getElementById('alert-area').style.display = 'none'; // 隱藏注意事項
+            document.getElementById('alert-area').style.display = 'none';
             document.getElementById('m-code').innerText = code;
-            
             list.innerHTML = '';
             groups.forEach(g => {
                 const btn = document.createElement('button'); btn.className = 'opt-btn';
@@ -343,7 +395,6 @@
         function closeM() { document.getElementById('modal').style.display = 'none'; }
         
         function resetAll() { if(confirm('清除所有結果？')) { resetList(); clearInput(); } }
-        function clearCache() { if(confirm('重設將會清除資料，確定？')) { try{localStorage.removeItem('productData_v13');}catch(e){} location.reload(); } }
     </script>
 </body>
 </html>
