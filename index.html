@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SET SALE CODE 系統 (V14)</title>
+    <title>SET SALE CODE 系統 (V17)</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-title" content="查貨Code">
@@ -20,10 +20,8 @@
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: var(--text); padding-bottom: 320px; user-select: none; -webkit-user-select: none; }
         
-        /* 隱藏匯入畫面，改用設定按鈕 */
-        #settings-panel { display: none; text-align: center; padding: 20px; background: #fff; border-radius: 14px; margin-bottom: 20px; }
+        #settings-panel { display: none; text-align: center; padding: 20px; background: #fff; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 狀態列 */
         .status-bar { 
             background: #e5e5ea; color: #333; padding: 10px; 
             border-radius: 10px; text-align: center; font-size: 13px; margin-bottom: 15px; 
@@ -35,19 +33,15 @@
         }
         .btn-sync:active { opacity: 0.7; }
 
-        /* 查詢畫面 */
         #search-screen { display: block; }
         .header { background: var(--card); padding: 15px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; margin-bottom: 15px; position: sticky; top: 10px; z-index: 50; }
         h2 { margin: 0 0 5px 0; font-size: 1.2rem; color: #1c1c1e; }
         .db-info { font-size: 13px; color: #8e8e93; margin-bottom: 8px; }
 
-        .input-wrapper { position: relative; width: 160px; margin: 0 auto; }
-        .input-display { width: 100%; background: #e5e5ea; border: none; border-radius: 10px; padding: 12px; padding-right: 35px; font-size: 28px; font-weight: 600; text-align: center; letter-spacing: 1px; color: #000; min-height: 40px; box-sizing: border-box; }
+        /* V17：還原置中輸入框，移除交叉所需空間 */
+        .input-display { width: 160px; margin: 0 auto; background: #e5e5ea; border: none; border-radius: 10px; padding: 12px; font-size: 28px; font-weight: 600; text-align: center; letter-spacing: 1px; color: #000; min-height: 40px; box-sizing: border-box; }
         .input-display.active::after { content: '|'; animation: blink 1s step-start infinite; color: var(--blue); margin-left: 2px; font-weight: normal; }
         @keyframes blink { 50% { opacity: 0; } }
-
-        .clear-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; background: #8e8e93; color: white; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; visibility: hidden; }
-        .clear-btn.visible { visibility: visible; }
 
         .list-box { display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
         .card { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -95,23 +89,22 @@
         .opt-btn:active { background: #e5e5ea; }
         #alert-title { font-size: 1.2rem; color: var(--red); margin-bottom: 10px; display: block; }
         #alert-msg { font-size: 1.1rem; color: #333; line-height: 1.5; white-space: pre-wrap; }
-        
-        .config-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        .config-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-size: 14px; }
+        .btn-save { background: #34c759; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div id="settings-panel" style="display:none;">
-        <h3>⚙️ 連結設定</h3>
+    <div id="settings-panel">
+        <h3>⚙️ 資料來源設定</h3>
         <p style="font-size:13px; color:#666; margin-bottom:10px;">請貼上 Google Sheet CSV 連結</p>
-        <input type="text" id="sheet-url" class="config-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
-        <button class="btn-save" onclick="saveConfig()">儲存設定</button>
+        <input type="text" id="sheet-url" class="config-input" placeholder="https://docs.google.com...">
+        <button class="btn-save" onclick="saveConfig()">儲存並更新</button>
         <br><br>
-        <button onclick="closeSettings()" style="background:none; border:none; color:#999; text-decoration:underline;">關閉</button>
+        <button onclick="closeSettings()" style="background:none; border:none; color:#999; text-decoration:underline;">取消</button>
     </div>
 
     <div id="search-screen">
-        
         <div class="status-bar">
             <span id="last-update">等待更新...</span>
             <button class="btn-sync" onclick="syncData()">🔄 更新資料</button>
@@ -119,12 +112,9 @@
 
         <div class="header">
             <h2>SET SALE CODE</h2>
-            <div class="db-info">資料庫: <span id="db-count">0</span> 筆</div>
+            <div class="db-info">資料庫: <span id="db-count">0</span> 筆 | 左滑刪除</div>
             
-            <div class="input-wrapper">
-                <div id="display-box" class="input-display active" onclick="focusInput()"></div>
-                <div id="clear-btn" class="clear-btn" onclick="clearInput()">✕</div>
-            </div>
+            <div id="display-box" class="input-display active" onclick="focusInput()"></div>
         </div>
 
         <div class="list-box">
@@ -136,7 +126,7 @@
         <div class="footer-action">
             <button class="btn-reset" onclick="resetAll()">🗑️ 清除結果</button>
             <div style="margin-top:20px;">
-                <button onclick="openSettings()" style="color:#8e8e93; background:none; border:none; text-decoration:underline; font-size:13px;">⚙️ 設定資料來源</button>
+                <button onclick="openSettings()" style="color:#8e8e93; background:none; border:none; text-decoration:underline; font-size:13px;">⚙️ 設定連結</button>
             </div>
         </div>
     </div>
@@ -178,111 +168,81 @@
         let db = {};
         let currentInput = "";
         let audioCtx = null;
-        let csvUrl = localStorage.getItem('sheet_url_v14') || "";
+        let csvUrl = localStorage.getItem('sheet_url_v15') || "";
 
-        // 初始化
         window.onload = function() {
-            // 嘗試讀取本地快取資料
-            const savedData = localStorage.getItem('productData_v14');
-            const savedTime = localStorage.getItem('updateTime_v14');
-            
-            if(savedData) {
+            const savedData = localStorage.getItem('productData_v15');
+            const savedTime = localStorage.getItem('updateTime_v15');
+            if(savedData && savedData.length > 20) {
                 parseData(savedData);
                 document.getElementById('last-update').innerText = "最後更新: " + (savedTime || "未知");
             } else {
-                if(!csvUrl) openSettings(); // 如果無資料又無Link，就打開設定
-                else syncData(); // 有Link就自動下載
+                if(!csvUrl) openSettings();
             }
             document.getElementById('custom-keyboard').style.display = 'grid';
         };
 
-        // --- 雲端同步核心邏輯 ---
         function syncData() {
             if(!csvUrl) { alert("請先設定 Google Sheet 連結！"); openSettings(); return; }
-            
-            document.querySelector('.btn-sync').innerText = "下載中...";
+            const btn = document.querySelector('.btn-sync');
+            btn.innerText = "連線中...";
             
             fetch(csvUrl)
-            .then(response => {
-                if (!response.ok) throw new Error("網絡錯誤");
-                return response.text();
-            })
-            .then(text => {
-                // 成功下載
-                const now = new Date().toLocaleString();
-                localStorage.setItem('productData_v14', text);
-                localStorage.setItem('updateTime_v14', now);
-                parseData(text);
-                document.getElementById('last-update').innerText = "最後更新: " + now;
-                document.querySelector('.btn-sync').innerText = "✅ 更新成功";
-                setTimeout(() => document.querySelector('.btn-sync').innerText = "🔄 更新資料", 2000);
-            })
-            .catch(error => {
-                alert("❌ 更新失敗：無法讀取 Google Sheet。\n請檢查連結是否正確及已發佈為 CSV。");
-                document.querySelector('.btn-sync').innerText = "🔄 更新資料";
+            .then(response => { if (!response.ok) throw new Error("Direct Failed"); return response.text(); })
+            .then(text => handleSuccess(text))
+            .catch(err => {
+                console.log("Direct failed, trying proxy...");
+                btn.innerText = "嘗試中轉...";
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(csvUrl);
+                fetch(proxyUrl)
+                .then(response => { if (!response.ok) throw new Error("Proxy Failed"); return response.text(); })
+                .then(text => handleSuccess(text))
+                .catch(finalErr => {
+                    alert("❌ 更新失敗！請檢查連結或網絡。");
+                    btn.innerText = "🔄 更新資料";
+                });
             });
         }
 
-        // --- 設定面板 ---
-        function openSettings() {
-            document.getElementById('settings-panel').style.display = 'block';
-            document.getElementById('search-screen').style.display = 'none';
-            document.getElementById('sheet-url').value = csvUrl;
-        }
-        function closeSettings() {
-            document.getElementById('settings-panel').style.display = 'none';
-            document.getElementById('search-screen').style.display = 'block';
-        }
-        function saveConfig() {
-            const url = document.getElementById('sheet-url').value.trim();
-            if(url) {
-                csvUrl = url;
-                localStorage.setItem('sheet_url_v14', url);
-                closeSettings();
-                syncData(); // 儲存後立即嘗試同步
-            } else {
-                alert("請輸入連結");
-            }
+        function handleSuccess(text) {
+            const now = new Date().toLocaleString();
+            localStorage.setItem('productData_v15', text);
+            localStorage.setItem('updateTime_v15', now);
+            if(parseData(text)) {
+                document.getElementById('last-update').innerText = "最後更新: " + now;
+                const btn = document.querySelector('.btn-sync');
+                btn.innerText = "✅ 成功";
+                setTimeout(() => btn.innerText = "🔄 更新資料", 2000);
+            } else { alert("⚠️ 資料格式有誤"); }
         }
 
-        // --- 解析 Google Sheet CSV ---
         function parseData(text) {
             db = {}; let count = 0; 
-            // 處理 CSV 可能的引號同逗號 (簡單處理: 假設 Google Sheet 匯出格式)
-            // 由於 CSV 用逗號分隔，我哋需要將佢轉返做物件
-            // 注意：如果你的 Google Sheet 是標準 CSV，分隔符是逗號 ','
-            // 之前的版本是用 '|'，這裡我們會兼容處理
-            
             const lines = text.split(/\r\n|\n|\r/);
             lines.forEach(line => {
                 if(!line.trim()) return;
                 
-                // 判斷是用逗號還是豎線分隔
-                let cols;
-                if(line.includes('|')) {
-                    cols = line.split('|'); // 兼容舊格式
+                let cols = [];
+                if(line.includes('|') && !line.includes('","')) {
+                    cols = line.split('|'); 
                 } else {
-                    // 簡單 CSV parser (處理逗號)
-                    // 假設無內容包含逗號嘅複雜情況，直接 split
-                    cols = line.split(','); 
+                    let re_value = /(?!\s*$)\s*(?:'([^']*)'|"([^"]*)"|([^,'"]*))\s*(?:,|$)/g;
+                    let match;
+                    while (match = re_value.exec(line)) {
+                        if (match[0] === '') break; 
+                        cols.push(match[1] || match[2] || match[3] || "");
+                    }
                 }
 
                 if(cols.length < 2) return;
                 
-                // 欄位對應: 0:Code, 1:Name, 2:Model, 3:ItemCode, 4:Group, 5:Note
-                // 移除 CSV 可能帶有的引號
-                const clean = (s) => s ? s.replace(/^"|"$/g, '').trim() : '';
-                
+                const clean = (s) => s ? s.trim() : '';
                 const item = {
-                    code: clean(cols[0]), 
-                    name: clean(cols[1]), 
-                    model: clean(cols[2]), 
-                    cargo: clean(cols[3]), 
-                    group: clean(cols[4]),
-                    note: clean(cols[5])
+                    code: clean(cols[0]), name: clean(cols[1]), model: clean(cols[2]), 
+                    cargo: clean(cols[3]), group: clean(cols[4]),
+                    note: cols.slice(5).join(', ').trim()
                 };
                 
-                // 如果是標題列(Code/代碼)，跳過
                 if(item.code.toLowerCase() === 'code' || item.code === '代碼') return;
 
                 let k = item.code.toLowerCase(); 
@@ -294,107 +254,63 @@
             return count > 0;
         }
 
-        // --- 原有功能維持不變 ---
+        function openSettings() { document.getElementById('settings-panel').style.display = 'block'; document.getElementById('search-screen').style.display = 'none'; document.getElementById('sheet-url').value = csvUrl; }
+        function closeSettings() { document.getElementById('settings-panel').style.display = 'none'; document.getElementById('search-screen').style.display = 'block'; }
+        function saveConfig() { const url = document.getElementById('sheet-url').value.trim(); if(url) { csvUrl = url; localStorage.setItem('sheet_url_v15', url); closeSettings(); syncData(); } else { alert("請輸入連結"); } }
+
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); }
-        function playTone(type) {
-            try { initAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
-            if(type==='click'){o.frequency.value=500;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.03);}
-            else if(type==='del'){o.frequency.value=300;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.05);}
-            else if(type==='go'){o.frequency.value=800;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.1);}
-            else if(type==='trash'){o.type='square';o.frequency.value=150;g.gain.value=0.2;o.start();o.stop(audioCtx.currentTime+0.1);}
-            } catch(e){}
-        }
+        function playTone(type) { try { initAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination); if(type==='click'){o.frequency.value=500;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.03);} else if(type==='del'){o.frequency.value=300;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.05);} else if(type==='go'){o.frequency.value=800;g.gain.value=0.5;o.start();o.stop(audioCtx.currentTime+0.1);} else if(type==='trash'){o.type='square';o.frequency.value=150;g.gain.value=0.2;o.start();o.stop(audioCtx.currentTime+0.1);} } catch(e){} }
         function triggerVibration() { try { if (navigator.vibrate) navigator.vibrate(10); } catch(e) {} }
-
-        function tap(key) {
-            event.preventDefault(); triggerVibration();
-            if (key === 'DEL') { playTone('del'); if (currentInput.length > 0) currentInput = currentInput.slice(0, -1); } 
-            else if (key === 'GO') { playTone('go'); runSearch(); return; } 
-            else { playTone('click'); if (currentInput.length < 6) currentInput += key; }
-            updateDisplay();
+        function tap(key) { event.preventDefault(); triggerVibration(); if (key === 'DEL') { playTone('del'); if (currentInput.length > 0) currentInput = currentInput.slice(0, -1); } else if (key === 'GO') { playTone('go'); runSearch(); return; } else { playTone('click'); if (currentInput.length < 6) currentInput += key; } updateDisplay(); }
+        
+        function updateDisplay() { 
+            // V17: 移除了處理交叉按鈕的邏輯
+            document.getElementById('display-box').innerText = currentInput; 
         }
-
-        function updateDisplay() {
-            document.getElementById('display-box').innerText = currentInput;
-            document.getElementById('clear-btn').className = currentInput.length > 0 ? 'clear-btn visible' : 'clear-btn';
-        }
+        
         function clearInput() { currentInput = ""; playTone('del'); updateDisplay(); }
         function focusInput() {}
-
-        function runSearch() {
-            const val = currentInput.trim().toLowerCase(); if(!val) return;
-            const res = db[val];
-            if(!res) { if(navigator.vibrate) navigator.vibrate([30,50,30]); alert('⚠️ 找不到: ' + currentInput); return; }
-            const groups = [...new Set(res.map(i => i.group))];
-            if(groups.length === 1) { add(res); clearInput(); } else { openM(currentInput.toUpperCase(), groups, res); }
+        
+        function runSearch() { 
+            const val = currentInput.trim().toLowerCase(); 
+            if(!val) return; 
+            const res = db[val]; 
+            
+            if(!res) { 
+                if(navigator.vibrate) navigator.vibrate([30,50,30]); 
+                alert('⚠️ 找不到: ' + currentInput); 
+                
+                // V17 重點：加入自動清空功能
+                clearInput(); 
+                return; 
+            } 
+            
+            const groups = [...new Set(res.map(i => i.group))]; 
+            if(groups.length === 1) { add(res); clearInput(); } else { openM(currentInput.toUpperCase(), groups, res); } 
         }
-
+        
         function resetList() { document.getElementById('tb-a').innerHTML=''; document.getElementById('tb-b').innerHTML=''; document.getElementById('tb-c').innerHTML=''; }
         function deleteBatch(id) { playTone('trash'); if(navigator.vibrate) navigator.vibrate(20); document.querySelectorAll('.'+id).forEach(el => { el.classList.add('deleting'); setTimeout(()=>el.remove(),300); }); }
-
+        
         function add(items) {
             const bid = 'batch-' + Date.now();
             items.forEach(i => {
                 let tid = 'tb-c'; const c = i.code.charAt(0).toLowerCase(); if(c==='a') tid='tb-a'; if(c==='b') tid='tb-b';
-                
                 let noteHtml = '';
-                if(i.note && i.note !== "") {
-                    const safeNote = i.note.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-                    noteHtml = `<span class="note-icon" onclick="showAlert('${safeNote}')">❗️</span>`;
+                if(i.note && i.note.length > 0) { 
+                    const safeNote = i.note.replace(/"/g, '&quot;').replace(/'/g, "\\'"); 
+                    noteHtml = `<span class="note-icon" onclick="showAlert('${safeNote}')">❗️</span>`; 
                 }
-
                 const row = document.createElement('div'); row.className = `swipe-container ${bid}`;
-                row.innerHTML = `
-                    <div class="swipe-scroll">
-                        <div class="swipe-content">
-                            <div class="code">${i.code}</div>
-                            <div class="content-cell">
-                                <div class="info-col">
-                                    <div class="info">${i.name} ${noteHtml}</div>
-                                    <div class="model-txt">型號: ${i.model}</div>
-                                    <span class="tag">${i.cargo}</span>
-                                </div>
-                                <div class="chk-col">
-                                    <div class="chk-box"><div class="chk-label">DC</div><input type="checkbox"></div>
-                                    <div class="chk-box"><div class="chk-label">KB</div><input type="checkbox"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="swipe-action" onclick="deleteBatch('${bid}')">刪除</div>
-                    </div>
-                `;
+                row.innerHTML = `<div class="swipe-scroll"><div class="swipe-content"><div class="code">${i.code}</div><div class="content-cell"><div class="info-col"><div class="info">${i.name} ${noteHtml}</div><div class="model-txt">型號: ${i.model}</div><span class="tag">${i.cargo}</span></div><div class="chk-col"><div class="chk-box"><div class="chk-label">DC</div><input type="checkbox"></div><div class="chk-box"><div class="chk-label">KB</div><input type="checkbox"></div></div></div></div><div class="swipe-action" onclick="deleteBatch('${bid}')">刪除</div></div>`;
                 const tb = document.getElementById(tid); tb.insertBefore(row, tb.firstChild);
             });
         }
-
-        function showAlert(msg) {
-            event.stopPropagation();
-            const m = document.getElementById('modal');
-            document.getElementById('m-code').innerText = ''; 
-            document.getElementById('m-list').innerHTML = ''; 
-            document.getElementById('alert-area').style.display = 'block';
-            document.getElementById('alert-msg').innerText = msg;
-            m.style.display = 'flex';
-        }
-
-        function openM(code, groups, items) {
-            const m = document.getElementById('modal');
-            const list = document.getElementById('m-list');
-            document.getElementById('alert-area').style.display = 'none';
-            document.getElementById('m-code').innerText = code;
-            list.innerHTML = '';
-            groups.forEach(g => {
-                const btn = document.createElement('button'); btn.className = 'opt-btn';
-                btn.innerHTML = `<b>${g || '標準版 / 套裝'}</b>`;
-                btn.onclick = () => { playTone('click'); triggerVibration(); add(items.filter(i=>i.group===g)); closeM(); clearInput(); };
-                list.appendChild(btn);
-            });
-            m.style.display = 'flex';
-        }
-        
+        function showAlert(msg) { event.stopPropagation(); const m = document.getElementById('modal'); document.getElementById('m-code').innerText = ''; document.getElementById('m-list').innerHTML = ''; document.getElementById('alert-area').style.display = 'block'; document.getElementById('alert-msg').innerText = msg; m.style.display = 'flex'; }
+        function openM(code, groups, items) { const m = document.getElementById('modal'); const list = document.getElementById('m-list'); document.getElementById('alert-area').style.display = 'none'; document.getElementById('m-code').innerText = code; list.innerHTML = ''; groups.forEach(g => { const btn = document.createElement('button'); btn.className = 'opt-btn'; btn.innerHTML = `<b>${g || '標準版 / 套裝'}</b>`; btn.onclick = () => { playTone('click'); triggerVibration(); add(items.filter(i=>i.group===g)); closeM(); clearInput(); }; list.appendChild(btn); }); m.style.display = 'flex'; }
         function closeM() { document.getElementById('modal').style.display = 'none'; }
-        
         function resetAll() { if(confirm('清除所有結果？')) { resetList(); clearInput(); } }
+        function clearCache() { if(confirm('重設將會清除資料，確定？')) { try{localStorage.removeItem('productData_v15');}catch(e){} location.reload(); } }
     </script>
 </body>
 </html>
